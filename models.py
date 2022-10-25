@@ -60,4 +60,16 @@ class User(db.Model):
         else:
             return False
 
-# class Note(db.Model)
+class Note(db.Model):
+    """Model for notes"""
+
+    __tablename__ = 'notes'
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    owner = db.Column(db.String(20), db.ForeignKey("users.username"), nullable=False)
+
+    user = db.relationship('User',
+                    backref='notes')
+

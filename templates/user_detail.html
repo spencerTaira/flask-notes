@@ -4,14 +4,28 @@
 {% block content %}
 <h1>Hello {{ user.first_name }}!</h1>
 
-<h4>User Profile:</h4>
+<h3>User Profile:</h3>
 <p><span style="font-weight: bold">Username: </span>{{ user.username }}</p>
 <p><span style="font-weight: bold">Email: </span>{{ user.email }}</p>
 <p><span style="font-weight: bold">First Name: </span>{{ user.first_name }}</p>
 <p><span style="font-weight: bold">Last Name: </span>{{ user.last_name }}</p>
 
+<h3>Notes: </h3>
+{% for note in notes %}
+  <li><b>{{ note.title }}: </b>
+  <p>{{ note.content }}</p>
+  <button formaction="/notes/{{ note.id }}/edit" formmethod="GET">Edit</button>
+  <button formaction="/notes/{{ note.id }}/delete" formmethod="POST">Delete</button>
+  </li>
+{% endfor %}
+<form action="/users/{{user.username}}/notes/add" method="GET">
+  <input type="submit" value="Add More Notes"></input>
+</form>
+
+
 <form action="/logout" method="POST">
   {{form.hidden_tag()}}
   <button class="btn btn-info">Logout</button>
 </form>
+
 {% endblock %}

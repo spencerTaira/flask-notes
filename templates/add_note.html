@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Add Note{% endblock %}
+
+{% block content %}
+<form id="add-note-form" method="POST" class="form-group">
+  {% include '_form.html' %}
+
+  <button type="submit" class="btn btn-info">Add Note</button>
+</form>
+
+{% endblock %}

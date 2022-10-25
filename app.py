@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db, User
-from forms import CSRFProtectForm, RegisterForm, LoginForm
+from models import db, connect_db, User, Note
+from forms import CSRFProtectForm, RegisterForm, LoginForm, AddNotesForm
 
 app = Flask(__name__)
 
@@ -83,15 +83,18 @@ def show_user_detail(username):
     If logged in, shows user info and has logout button.
     Else redirects to root and shows flashed message
     """
+
+
     form = CSRFProtectForm()
     user = User.query.get_or_404(username)
+    notes = user.notes
 
     if session.get('username') != username:
         flash("You must be logged in to view!")
         return redirect('/')
 
     else:
-        return render_template("user_detail.html", form=form, user=user)
+        return render_template("user_detail.html", form=form, user=user, notes=notes)
 
 @app.post('/logout')
 def logout():
@@ -106,3 +109,32 @@ def logout():
         # Remove "username" if present, but no errors if it isn't
         session.pop('username', None)
     return redirect('/')
+
+@app.route('/users/<username>/notes/add', methods=['GET', 'POST'])
+def add_note(username):
+    """GET: Displays a form to add a note to the database
+       POST: Gets form data for new note and adds to the database.
+       If invalid input, redirect to users/username.
+       """
+    print('I GOT HEREEREEERERERERERER  $$$$$$$$$$$$$$$$$$$$$$$')
+    form = AddNotesForm()
+
+    if session.get('username') != username:
+        flash("You must be logged in to view!")
+        return redirect('/')
+
+    else:
+        if form.validate_on_submit():
+            title = form.title.data
+            content = form.content.data
+
+            user = User.query.get_or_404(username)
+            note = Note(title=title, content=content, owner=user.username)
+
+            db.session.add(note)
+            db.session.commit()
+
+            return redirect(f'/users/{username}')
+
+        else:
+            return render_template('add_note.html', form=form)
