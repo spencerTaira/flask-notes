@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, User
-from forms import RegisterForm, LoginForm
+from forms import CSRFProtectForm, RegisterForm, LoginForm
 
 app = Flask(__name__)
 
@@ -45,7 +45,7 @@ def register():
 
         session['username'] = user.username
 
-        return redirect('/secret')
+        return redirect(f'/users/{user.username}')
 
     else:
         return render_template('register.html', form=form)
@@ -75,12 +75,24 @@ def login():
 def show_user_detail(username):
     """Example of hidden page for logged-in users only """
 
+    form = CSRFProtectForm()
     user = User.query.get_or_404(username)
 
-    if session['username'] != username:
+    if session.get('username') != username:
         flash("You must be logged in to view!")
         return redirect('/')
 
     else:
-        return render_template("user_detail.html", user=user)
+        return render_template("user_detail.html", form=form, user=user)
 
+@app.post('/logout')
+def logout():
+    """ Logs user out and redirects to homepage """
+
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+        # Remove "username" if present, but no errors if it isn't
+        session.pop('username', None)
+        print('LOGOGOGOGOGOGOGOGOOGOoooOOOOOOO!!!!!!!!!!!!!!!!')
+    return redirect('/')
