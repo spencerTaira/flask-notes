@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'our secret'
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///adopt"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///notes"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SQLALCHEMY_ECHO"] = True
 
@@ -49,3 +49,5 @@ def register():
 
     else:
         return render_template('register.html', form=form)
+
+@app.get('/secret')

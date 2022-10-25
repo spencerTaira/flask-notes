@@ -1,2 +1,29 @@
 {% extends 'base.html' %}
 {% block title %}Register Form{% endblock %}
+
+{% block content %}
+<form id="pet-add-form" method="POST" class="form-group">
+  {{ form.hidden_tag() }} <!--add type=hidden form fields -->
+
+  {% for field in form
+        if field.widget.input_type != 'hidden' %}
+
+    <p>
+      {{ field.label }}
+      {% if field.id != "available" %} <!--different styling for checkbox -->
+        {{ field (class_="form-control")}}
+      {% else %}
+        {{ field }}
+      {% endif %}
+
+      {% for error in field.errors %}
+        {{ error }}
+      {% endfor %}
+    </p>
+
+  {% endfor %}
+
+  <button type="submit" class="btn btn-info">Submit</button>
+</form>
+
+{% endblock %}

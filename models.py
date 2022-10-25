@@ -24,12 +24,12 @@ class User(db.Model):
                          nullable=False,
                          unique=True)
     email = db.Column(db.String(50),
-                      nullabe=False,
+                      nullable=False,
                       unique=True)
     first_name = db.Column(db.String(30),
-                           nullabe=False)
+                           nullable=False)
     last_name = db.Column(db.String(30),
-                          nullabe=False)
+                          nullable=False)
 
     @classmethod
     def register(cls, username, password, email, first_name, last_name):
