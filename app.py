@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, User
-from forms import RegisterForm
+from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
 
@@ -39,15 +39,48 @@ def register():
         first_name = form.first_name.data
         last_name = form.last_name.data
 
-        user = User.register()
+        user = User.register(username, password, email, first_name, last_name)
         db.session.add(user)
         db.session.commit()
 
-        session['user_id'] = user.username
+        session['username'] = user.username
 
         return redirect('/secret')
 
     else:
         return render_template('register.html', form=form)
 
-@app.get('/secret')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Produce login form or handle form"""
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        name = form.username.data
+        password = form.password.data
+
+        user = User.authenticate(name, password)
+
+        if user:
+            session['username'] = user.username
+            return redirect(f'/users/{user.username}')
+        else:
+            form.username.errors = ["Incorrect username/password"]
+
+    return render_template("login.html", form=form)
+
+
+@app.get('/users/<username>')
+def show_user_detail(username):
+    """Example of hidden page for logged-in users only """
+
+    user = User.query.get_or_404(username)
+
+    if session['username'] != username:
+        flash("You must be logged in to view!")
+        return redirect('/')
+
+    else:
+        return render_template("user_detail.html", user=user)
+
