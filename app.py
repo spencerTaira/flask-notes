@@ -29,7 +29,10 @@ def root():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-
+    """ GET: Renders register.html
+        POST: Registers user if info is valid, adds session cookie with username,
+        and redirects to /users/<username>
+    """
     form = RegisterForm()
 
     if form.validate_on_submit():
@@ -52,7 +55,10 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Produce login form or handle form"""
+    """GET: Renders login.html form
+       POST: validates login info and if valid add session cookie wiht username,
+       and redirects to /users/<usersname>
+    """
 
     form = LoginForm()
 
@@ -67,14 +73,16 @@ def login():
             return redirect(f'/users/{user.username}')
         else:
             form.username.errors = ["Incorrect username/password"]
-
+            #Fall through to render_template
     return render_template("login.html", form=form)
 
 
 @app.get('/users/<username>')
 def show_user_detail(username):
-    """Example of hidden page for logged-in users only """
-
+    """Example of hidden page for logged-in users only
+    If logged in, shows user info and has logout button.
+    Else redirects to root and shows flashed message
+    """
     form = CSRFProtectForm()
     user = User.query.get_or_404(username)
 
@@ -87,12 +95,14 @@ def show_user_detail(username):
 
 @app.post('/logout')
 def logout():
-    """ Logs user out and redirects to homepage """
+    """ Logs user out and redirects to homepage
+        Logs out user by removing session cookie with username and redirects to
+        root
+    """
 
     form = CSRFProtectForm()
 
     if form.validate_on_submit():
         # Remove "username" if present, but no errors if it isn't
         session.pop('username', None)
-        print('LOGOGOGOGOGOGOGOGOOGOoooOOOOOOO!!!!!!!!!!!!!!!!')
     return redirect('/')
