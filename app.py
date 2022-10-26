@@ -1,7 +1,8 @@
 from flask import Flask, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, User, Note
-from forms import CSRFProtectForm, RegisterForm, LoginForm, AddNotesForm
+from forms import CSRFProtectForm, RegisterForm, LoginForm, AddNotesForm, \
+    EditNotesForm
 
 app = Flask(__name__)
 
@@ -116,7 +117,7 @@ def add_note(username):
        POST: Gets form data for new note and adds to the database.
        If invalid input, redirect to users/username.
        """
-    print('I GOT HEREEREEERERERERERER  $$$$$$$$$$$$$$$$$$$$$$$')
+
     form = AddNotesForm()
 
     if session.get('username') != username:
@@ -138,3 +139,72 @@ def add_note(username):
 
         else:
             return render_template('add_note.html', form=form)
+
+@app.post('/notes/<note_id>/delete')
+def note_delete(note_id):
+    """ Deletes note with note_id from table and redirects to
+        /users/<username>
+    """
+
+    form = CSRFProtectForm()
+
+
+    if form.validate_on_submit():
+        note = Note.query.get_or_404(note_id)
+        username = note.user.username
+        db.session.delete(note)
+        db.session.commit()
+
+        flash('Note has been deleted!')
+        #fall through to redirect
+    return redirect(f'/users/{username}')
+
+@app.route('/notes/<note_id>/edit', methods=['GET', 'POST'])
+def note_edit(note_id):
+    """
+    GET: Show edit note form filled with note data
+    POST: Update table data with form data and redirect to /users/<username>
+    """
+
+    note = Note.query.get(note_id)
+    form = EditNotesForm(obj=note)
+
+    if session.get('username') != note.user.username:
+        flash("You must be logged in to view!")
+        return redirect('/')
+
+    else:
+        if form.validate_on_submit():
+            note.title = form.title.data
+            note.content = form.content.data
+
+            db.session.commit()
+
+            flash('Successfully edited')
+            return redirect(f'/users/{note.user.username}')
+
+        else:
+            return render_template('edit_note.html', form=form)
+
+@app.post('/users/<username>/delete')
+def user_delete(username):
+    """
+    Verifies CSRF and deletes user and their notes from tables
+    Redirects to root
+    """
+
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+
+        user = User.query.get(username)
+        notes = user.notes
+
+        for note in notes:
+            db.session.delete(note)
+
+        db.session.delete(user)
+        db.session.commit()
+        session.pop('username', None)
+        #fall through to redirect
+    return redirect('/')

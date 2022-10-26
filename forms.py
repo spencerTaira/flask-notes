@@ -24,5 +24,11 @@ class AddNotesForm(FlaskForm):
     title = StringField('Title', validators=[InputRequired()])
     content = TextAreaField('Content', validators=[InputRequired()])
 
+class EditNotesForm(FlaskForm):
+    """ Form for editing notes for the user """
+
+    title = StringField('Title', validators=[InputRequired()])
+    content = TextAreaField('Content', validators=[InputRequired()])
+
 class CSRFProtectForm(FlaskForm):
     """Form just for CSRF Protection"""
