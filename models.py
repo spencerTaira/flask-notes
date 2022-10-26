@@ -23,7 +23,7 @@ class User(db.Model):
                          primary_key=True)
     password = db.Column(db.String(100),
                          nullable=False,
-                         unique=True)
+                         unique=True) #don't make unique
     email = db.Column(db.String(50),
                       nullable=False,
                       unique=True)

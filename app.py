@@ -3,6 +3,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, User, Note
 from forms import CSRFProtectForm, RegisterForm, LoginForm, AddNotesForm, \
     EditNotesForm
+from werkzeug.exceptions import Unauthorized
+
 
 app = Flask(__name__)
 
@@ -121,8 +123,10 @@ def add_note(username):
     form = AddNotesForm()
 
     if session.get('username') != username:
-        flash("You must be logged in to view!")
-        return redirect('/')
+        # flash("You must be logged in to view!")
+        raise Unauthorized()
+
+        # return redirect('/')
 
     else:
         if form.validate_on_submit():
@@ -147,7 +151,7 @@ def note_delete(note_id):
     """
 
     form = CSRFProtectForm()
-
+    #add session protection
 
     if form.validate_on_submit():
         note = Note.query.get_or_404(note_id)
@@ -199,6 +203,9 @@ def user_delete(username):
 
         user = User.query.get(username)
         notes = user.notes
+
+        # Note.query.filter_by(owner=username).delete()
+        # Note.query
 
         for note in notes:
             db.session.delete(note)
